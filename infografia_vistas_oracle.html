@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Infografía: Vistas en Oracle SQL</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --card: #111827;
+    --card2: #0f172a;
+    --accent1: #00e5ff;
+    --accent2: #7c3aed;
+    --accent3: #f59e0b;
+    --accent4: #10b981;
+    --accent5: #f43f5e;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --border: rgba(0,229,255,0.15);
+    --glow: 0 0 30px rgba(0,229,255,0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ─── HEADER ─── */
+  .header {
+    text-align: center;
+    padding: 60px 0 40px;
+    position: relative;
+  }
+
+  .header-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--accent1);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.1s;
+  }
+
+  .header h1 {
+    font-size: clamp(2.8rem, 6vw, 5rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -2px;
+    background: linear-gradient(135deg, #00e5ff 0%, #7c3aed 60%, #f59e0b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.2s;
+  }
+
+  .header-sub {
+    font-size: 1rem;
+    color: var(--muted);
+    margin-top: 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.35s;
+  }
+
+  .header-line {
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent1), var(--accent2));
+    margin: 24px auto 0;
+    border-radius: 2px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.45s;
+  }
+
+  /* ─── INTRO CARD ─── */
+  .intro-card {
+    background: linear-gradient(135deg, rgba(0,229,255,0.06), rgba(124,58,237,0.06));
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 40px;
+    margin: 40px 0;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.5s;
+  }
+
+  .intro-card::before {
+    content: '"';
+    position: absolute;
+    top: -20px;
+    left: 30px;
+    font-size: 160px;
+    color: var(--accent1);
+    opacity: 0.05;
+    font-family: serif;
+    line-height: 1;
+  }
+
+  .intro-card p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #cbd5e1;
+  }
+
+  .intro-card strong {
+    color: var(--accent1);
+  }
+
+  /* ─── SECTION TITLE ─── */
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 52px 0 24px;
+  }
+
+  .section-title .num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent1);
+    background: rgba(0,229,255,0.08);
+    border: 1px solid rgba(0,229,255,0.25);
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 2px;
+  }
+
+  .section-title h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .section-title .line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ─── CARDS GRID ─── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+  @media (max-width: 700px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 28px;
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  }
+
+  .card-icon {
+    font-size: 2rem;
+    margin-bottom: 14px;
+    display: block;
+  }
+
+  .card h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .card p {
+    font-size: 0.875rem;
+    color: #94a3b8;
+    line-height: 1.7;
+  }
+
+  .card.c1 { border-top: 3px solid var(--accent1); }
+  .card.c2 { border-top: 3px solid var(--accent2); }
+  .card.c3 { border-top: 3px solid var(--accent3); }
+  .card.c4 { border-top: 3px solid var(--accent4); }
+  .card.c5 { border-top: 3px solid var(--accent5); }
+  .card.c6 { border-top: 3px solid #818cf8; }
+
+  /* ─── SYNTAX BLOCK ─── */
+  .syntax-block {
+    background: #060a12;
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 16px;
+    overflow: hidden;
+    margin: 24px 0;
+  }
+
+  .syntax-header {
+    background: rgba(0,229,255,0.07);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(0,229,255,0.1);
+  }
+
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #f43f5e; }
+  .dot.y { background: #f59e0b; }
+  .dot.g { background: #10b981; }
+
+  .syntax-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  .syntax-body {
+    padding: 24px 28px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 2;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  .kw { color: #7c3aed; font-weight: 600; }
+  .fn { color: #00e5ff; }
+  .str { color: #f59e0b; }
+  .cm { color: #475569; font-style: italic; }
+  .col { color: #10b981; }
+  .tbl { color: #f43f5e; }
+
+  /* ─── SCHEMA DIAGRAM ─── */
+  .schema-wrap {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 36px;
+    overflow-x: auto;
+  }
+
+  .schema {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .table-box {
+    background: #0a0e1a;
+    border-radius: 10px;
+    overflow: hidden;
+    min-width: 160px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .table-head {
+    padding: 10px 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .table-head.p { background: rgba(0,229,255,0.15); color: var(--accent1); }
+  .table-head.m { background: rgba(124,58,237,0.15); color: #a78bfa; }
+  .table-head.e { background: rgba(245,158,11,0.15); color: var(--accent3); }
+  .table-head.d { background: rgba(16,185,129,0.15); color: var(--accent4); }
+  .table-head.r { background: rgba(244,63,94,0.15); color: var(--accent5); }
+
+  .table-row {
+    padding: 5px 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: #64748b;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .table-row.pk { color: #f59e0b; }
+  .table-row.fk { color: #94a3b8; }
+
+  .arrow {
+    display: flex;
+    align-items: center;
+    color: var(--muted);
+    font-size: 1.5rem;
+    align-self: center;
+  }
+
+  /* ─── VIEW HIGHLIGHT ─── */
+  .view-box {
+    background: linear-gradient(135deg, rgba(0,229,255,0.08), rgba(124,58,237,0.08));
+    border: 2px solid rgba(0,229,255,0.3);
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin: 24px 0;
+    position: relative;
+  }
+
+  .view-box::before {
+    content: 'VIEW';
+    position: absolute;
+    top: -12px;
+    left: 24px;
+    background: var(--accent1);
+    color: #000;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 4px;
+    letter-spacing: 2px;
+  }
+
+  .view-box h3 {
+    font-size: 1.1rem;
+    color: var(--accent1);
+    margin-bottom: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .view-box p {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+
+  /* ─── EXERCISES LIST ─── */
+  .ex-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .ex-item {
+    display: flex;
+    gap: 18px;
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 20px 24px;
+    transition: border-color 0.3s;
+  }
+
+  .ex-item:hover { border-color: rgba(0,229,255,0.25); }
+
+  .ex-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent1);
+    opacity: 0.4;
+    min-width: 36px;
+  }
+
+  .ex-content h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .ex-content p {
+    font-size: 0.82rem;
+    color: #64748b;
+    font-family: 'IBM Plex Mono', monospace;
+    line-height: 1.6;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-family: 'IBM Plex Mono', monospace;
+    margin-top: 8px;
+  }
+
+  .tag.view { background: rgba(0,229,255,0.1); color: var(--accent1); }
+  .tag.query { background: rgba(124,58,237,0.1); color: #a78bfa; }
+  .tag.filter { background: rgba(245,158,11,0.1); color: var(--accent3); }
+  .tag.notin { background: rgba(244,63,94,0.1); color: var(--accent5); }
+
+  /* ─── CONCLUSION ─── */
+  .conclusion {
+    background: linear-gradient(135deg, #0f172a, #1e1b4b);
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 20px;
+    padding: 44px;
+    margin-top: 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .conclusion::after {
+    content: '';
+    position: absolute;
+    bottom: -60px;
+    right: -60px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,58,237,0.2), transparent 70%);
+  }
+
+  .conclusion h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #a78bfa;
+    margin-bottom: 16px;
+  }
+
+  .conclusion p {
+    font-size: 1rem;
+    color: #94a3b8;
+    line-height: 1.8;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    text-align: center;
+    padding: 32px 0 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    border-top: 1px solid rgba(255,255,255,0.05);
+    margin-top: 48px;
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ─── BENEFIT PILLS ─── */
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .pill {
+    padding: 8px 18px;
+    border-radius: 99px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .pill.a1 { background: rgba(0,229,255,0.1); color: var(--accent1); border: 1px solid rgba(0,229,255,0.25); }
+  .pill.a2 { background: rgba(124,58,237,0.1); color: #a78bfa; border: 1px solid rgba(124,58,237,0.25); }
+  .pill.a3 { background: rgba(245,158,11,0.1); color: var(--accent3); border: 1px solid rgba(245,158,11,0.25); }
+  .pill.a4 { background: rgba(16,185,129,0.1); color: var(--accent4); border: 1px solid rgba(16,185,129,0.25); }
+  .pill.a5 { background: rgba(244,63,94,0.1); color: var(--accent5); border: 1px solid rgba(244,63,94,0.25); }
+
+  /* ─── COMPARISON ─── */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 600px) { .compare { grid-template-columns: 1fr; } }
+
+  .compare-box {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 24px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .compare-box h4 {
+    font-size: 0.85rem;
+    font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .compare-box h4.bad { color: var(--accent5); }
+  .compare-box h4.good { color: var(--accent4); }
+
+  .compare-box ul { list-style: none; }
+  .compare-box ul li {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    padding: 5px 0;
+    padding-left: 18px;
+    position: relative;
+  }
+
+  .compare-box ul li::before {
+    content: attr(data-icon);
+    position: absolute;
+    left: 0;
+  }
+
+  /* ─── INFO STRIP ─── */
+  .info-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin: 24px 0;
+  }
+
+  @media (max-width: 700px) { .info-strip { grid-template-columns: 1fr 1fr; } }
+
+  .stat-box {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 20px 16px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .stat-num {
+    font-size: 2rem;
+    font-weight: 800;
+    font-family: 'Space Mono', monospace;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-tag">UAC · Ingeniería de Sistemas · Taller 2.3</div>
+    <h1>VISTAS EN<br>ORACLE SQL</h1>
+    <p class="header-sub">// Richard Triveños Llaccta · Grupo 64bits · 2026</p>
+    <div class="header-line"></div>
+  </div>
+
+  <!-- INTRO -->
+  <div class="intro-card reveal">
+    <p>Una <strong>vista (VIEW)</strong> es un objeto virtual en la base de datos que almacena una consulta SQL compleja como si fuera una tabla. No guarda datos físicos — <strong>solo guarda la lógica de la consulta</strong>. Cada vez que se consulta la vista, Oracle ejecuta esa lógica en tiempo real, devolviendo los datos actualizados.</p>
+    <div class="pills" style="margin-top:20px">
+      <span class="pill a1">Simplifica consultas</span>
+      <span class="pill a2">Mejora seguridad</span>
+      <span class="pill a3">Reutilización de código</span>
+      <span class="pill a4">Abstracción de datos</span>
+      <span class="pill a5">Mantenimiento fácil</span>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="info-strip reveal">
+    <div class="stat-box">
+      <div class="stat-num">7</div>
+      <div class="stat-label">Tablas en el sistema clínico</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">7</div>
+      <div class="stat-label">Vistas creadas en el taller</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">4</div>
+      <div class="stat-label">JOINs en la vista principal</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">0</div>
+      <div class="stat-label">Datos duplicados almacenados</div>
+    </div>
+  </div>
+
+  <!-- SINTAXIS -->
+  <div class="section-title reveal">
+    <span class="num">01</span>
+    <h2>Sintaxis Fundamental</h2>
+    <div class="line"></div>
+  </div>
+
+  <div class="syntax-block reveal">
+    <div class="syntax-header">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <span class="syntax-label">oracle_view.sql</span>
+    </div>
+    <div class="syntax-body"><span class="cm">-- Creación básica de una vista</span>
+<span class="kw">CREATE OR REPLACE VIEW</span> <span class="fn">v_NombreVista</span> <span class="kw">AS</span>
+<span class="kw">SELECT</span>
+    <span class="col">t1.campo1</span>,
+    <span class="col">t1.campo2</span>,
+    <span class="col">t2.campo3</span>
+<span class="kw">FROM</span>  <span class="tbl">tabla1</span> t1
+<span class="kw">JOIN</span>  <span class="tbl">tabla2</span> t2 <span class="kw">ON</span> t1.id = t2.id_fk;
+
+<span class="cm">-- Uso: exactamente igual que una tabla</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="fn">v_NombreVista</span>;
+<span class="kw">SELECT</span> <span class="col">COUNT(*)</span> <span class="kw">FROM</span> <span class="fn">v_NombreVista</span> <span class="kw">WHERE</span> campo1 = <span class="str">'valor'</span>;</div>
+  </div>
+
+  <!-- ESQUEMA BD -->
+  <div class="section-title reveal">
+    <span class="num">02</span>
+    <h2>Modelo de Base de Datos — Sistema Clínico</h2>
+    <div class="line"></div>
+  </div>
+
+  <div class="schema-wrap reveal">
+    <div class="schema">
+      <div class="table-box">
+        <div class="table-head p">tPaciente</div>
+        <div class="table-row pk">🔑 codP (PK)</div>
+        <div class="table-row">tipoDocP</div>
+        <div class="table-row">nroDocP</div>
+        <div class="table-row">paternoP / maternoP</div>
+        <div class="table-row">nombresP</div>
+        <div class="table-row">fechaNacimientoP</div>
+        <div class="table-row">generoP</div>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="table-box">
+        <div class="table-head d">tDiagnostico</div>
+        <div class="table-row pk">🔑 codD (PK)</div>
+        <div class="table-row">fechaHoraD</div>
+        <div class="table-row">descripcionD</div>
+        <div class="table-row fk">🔗 codP (FK→Paciente)</div>
+        <div class="table-row fk">🔗 codM (FK→Medico)</div>
+      </div>
+
+      <div class="arrow">↔</div>
+
+      <div class="table-box">
+        <div class="table-head r">tEnfermedadEnDiag</div>
+        <div class="table-row pk">🔑 CodED (PK)</div>
+        <div class="table-row fk">🔗 codE (FK→Enf.)</div>
+        <div class="table-row fk">🔗 codD (FK→Diag.)</div>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="table-box">
+        <div class="table-head e">tEnfermedad</div>
+        <div class="table-row pk">🔑 codE (PK)</div>
+        <div class="table-row">nombreE</div>
+        <div class="table-row">descricionE</div>
+      </div>
+    </div>
+
+    <div class="schema" style="margin-top:20px">
+      <div class="table-box">
+        <div class="table-head m">tMedico</div>
+        <div class="table-row pk">🔑 codM (PK)</div>
+        <div class="table-row">paternoM / maternoM</div>
+        <div class="table-row">nombresM</div>
+        <div class="table-row">celularM</div>
+        <div class="table-row">generoM</div>
+      </div>
+
+      <div class="arrow">↔</div>
+
+      <div class="table-box">
+        <div class="table-head r">tEspecialidadDelMedico</div>
+        <div class="table-row pk">🔑 codEspM (PK)</div>
+        <div class="table-row fk">🔗 codEsp (FK→Esp.)</div>
+        <div class="table-row fk">🔗 codM (FK→Medico)</div>
+        <div class="table-row">fechaObtencion</div>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="table-box">
+        <div class="table-head e">tEspecialidad</div>
+        <div class="table-row pk">🔑 codEsp (PK)</div>
+        <div class="table-row">nombreEsp</div>
+        <div class="table-row">descripcionEsp</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VISTA PRINCIPAL -->
+  <div class="section-title reveal">
+    <span class="num">03</span>
+    <h2>Vista Principal — v_PacienteEnfermedad</h2>
+    <div class="line"></div>
+  </div>
+
+  <div class="view-box reveal">
+    <h3>v_PacienteEnfermedad</h3>
+    <p>Unifica 4 tablas (tPaciente, tDiagnostico, tEnfermedadEnElDiagnostico, tEnfermedad) en un solo objeto consultable. En lugar de escribir 4 JOINs cada vez, basta con <code style="color:var(--accent1)">SELECT * FROM v_PacienteEnfermedad</code>.</p>
+  </div>
+
+  <div class="syntax-block reveal">
+    <div class="syntax-header">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <span class="syntax-label">v_PacienteEnfermedad</span>
+    </div>
+    <div class="syntax-body"><span class="kw">CREATE OR REPLACE VIEW</span> <span class="fn">v_pacienteEnfermedad</span> <span class="kw">AS</span>
+<span class="kw">SELECT</span>
+    p.<span class="col">codP</span>          <span class="kw">AS</span> codigoP,
+    p.<span class="col">nombresP</span>,
+    p.<span class="col">paternoP</span>,
+    p.<span class="col">maternoP</span>,
+    d.<span class="col">codD</span>          <span class="kw">AS</span> codigoD,
+    d.<span class="col">descripcionD</span>  <span class="kw">AS</span> nombreD,
+    e.<span class="col">nombreE</span>
+<span class="kw">FROM</span>   <span class="tbl">tPaciente</span>                  p
+<span class="kw">JOIN</span>   <span class="tbl">tDiagnostico</span>               d  <span class="kw">ON</span> p.codP  = d.codP
+<span class="kw">JOIN</span>   <span class="tbl">tEnfermedadEnElDiagnostico</span>  ed <span class="kw">ON</span> d.codD  = ed.codD
+<span class="kw">JOIN</span>   <span class="tbl">tEnfermedad</span>                e  <span class="kw">ON</span> ed.codE = e.codE;
+
+<span class="cm">-- Contar enfermedades por paciente usando la vista:</span>
+<span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) <span class="kw">AS</span> cantidad_de_enfermedades,
+       nombresP, paternoP, maternoP
+<span class="kw">FROM</span>   <span class="fn">v_pacienteEnfermedad</span>
+<span class="kw">GROUP BY</span> nombresP, paternoP, maternoP;</div>
+  </div>
+
+  <!-- BENEFICIOS VS DIRECTO -->
+  <div class="section-title reveal">
+    <span class="num">04</span>
+    <h2>¿Por qué usar Vistas?</h2>
+    <div class="line"></div>
+  </div>
+
+  <div class="compare reveal">
+    <div class="compare-box">
+      <h4 class="bad">✗ Sin vistas — consulta directa</h4>
+      <ul>
+        <li data-icon="✗ ">Escribir JOINs complejos cada vez</li>
+        <li data-icon="✗ ">Código repetido en múltiples lugares</li>
+        <li data-icon="✗ ">Expone todas las columnas (seguridad)</li>
+        <li data-icon="✗ ">Mantenimiento costoso al cambiar tablas</li>
+        <li data-icon="✗ ">Difícil de leer y auditar</li>
+      </ul>
+    </div>
+    <div class="compare-box">
+      <h4 class="good">✓ Con vistas — acceso simplificado</h4>
+      <ul>
+        <li data-icon="✓ ">SELECT simple sobre un objeto legible</li>
+        <li data-icon="✓ ">Lógica centralizada en un solo lugar</li>
+        <li data-icon="✓ ">Control de columnas visibles (seguridad)</li>
+        <li data-icon="✓ ">Actualiza automáticamente al cambiar tablas</li>
+        <li data-icon="✓ ">Código limpio y reutilizable</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- EJERCICIOS -->
+  <div class="section-title reveal">
+    <span class="num">05</span>
+    <h2>Ejercicios en Clase — 7 Vistas Construidas</h2>
+    <div class="line"></div>
+  </div>
+
+  <div class="ex-list reveal">
+    <div class="ex-item">
+      <div class="ex-num">5.1</div>
+      <div class="ex-content">
+        <h4>Vista: Médicos y sus Especialidades</h4>
+        <p>CREATE OR REPLACE VIEW <span style="color:var(--accent1)">v_MedicosEspecialidades</span> → JOIN tMedico + tEspecialidadDelMedico + tEspecialidad</p>
+        <span class="tag view">CREATE VIEW</span> <span class="tag query">3 tablas</span>
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">5.2</div>
+      <div class="ex-content">
+        <h4>¿Cuántas especialidades tiene cada médico?</h4>
+        <p>SELECT COUNT(nombreEsp) AS cantidad_especialidades FROM <span style="color:var(--accent1)">v_MedicosEspecialidades</span> GROUP BY nombresM, paternoM</p>
+        <span class="tag query">COUNT + GROUP BY</span>
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">5.3</div>
+      <div class="ex-content">
+        <h4>Médicos con 2 o más especialidades</h4>
+        <p>Misma consulta del 5.2 + HAVING COUNT(nombreEsp) >= 2</p>
+        <span class="tag filter">HAVING</span>
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">5.4</div>
+      <div class="ex-content">
+        <h4>Vista: Enfermedades NO detectadas en diagnósticos</h4>
+        <p>CREATE OR REPLACE VIEW <span style="color:var(--accent1)">v_EnfermedadesNoDetectadas</span> → WHERE codE NOT IN (SELECT codE FROM tEnfermedadEnElDiagnostico)</p>
+        <span class="tag view">CREATE VIEW</span> <span class="tag notin">NOT IN</span>
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">5.5</div>
+      <div class="ex-content">
+        <h4>Vista: Especialidades sin médico asignado</h4>
+        <p>CREATE OR REPLACE VIEW <span style="color:var(--accent1)">v_EspecialidadesSinMedico</span> → WHERE codEsp NOT IN (SELECT codEsp FROM tEspecialidadDelMedico)</p>
+        <span class="tag view">CREATE VIEW</span> <span class="tag notin">NOT IN</span>
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">5.6</div>
+      <div class="ex-content">
+        <h4>¿Cuántas especialidades no tienen médico?</h4>
+        <p>SELECT COUNT(*) AS especialidades_sin_medico FROM <span style="color:var(--accent1)">v_EspecialidadesSinMedico</span></p>
+        <span class="tag query">COUNT(*)</span>
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-num">5.7</div>
+      <div class="ex-content">
+        <h4>Vista: Pacientes sin enfermedades en diagnóstico</h4>
+        <p>CREATE OR REPLACE VIEW <span style="color:var(--accent1)">v_PacientesSinEnfermedad</span> → SELECT DISTINCT + JOIN tDiagnostico WHERE codD NOT IN (...)</p>
+        <span class="tag view">CREATE VIEW</span> <span class="tag notin">NOT IN</span> <span class="tag filter">DISTINCT</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SINTAXIS COMPLETA EJERCICIOS -->
+  <div class="syntax-block reveal" style="margin-top:24px">
+    <div class="syntax-header">
+      <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      <span class="syntax-label">ejercicios_5.4 → 5.7</span>
+    </div>
+    <div class="syntax-body"><span class="cm">-- 5.4 Enfermedades no detectadas</span>
+<span class="kw">CREATE OR REPLACE VIEW</span> <span class="fn">v_EnfermedadesNoDetectadas</span> <span class="kw">AS</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">tEnfermedad</span>
+<span class="kw">WHERE</span> codE <span class="kw">NOT IN</span> (<span class="kw">SELECT</span> codE <span class="kw">FROM</span> <span class="tbl">tEnfermedadEnElDiagnostico</span>);
+
+<span class="cm">-- 5.5 Especialidades sin médico</span>
+<span class="kw">CREATE OR REPLACE VIEW</span> <span class="fn">v_EspecialidadesSinMedico</span> <span class="kw">AS</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> <span class="tbl">tEspecialidad</span>
+<span class="kw">WHERE</span> codEsp <span class="kw">NOT IN</span> (<span class="kw">SELECT</span> codEsp <span class="kw">FROM</span> <span class="tbl">tEspecialidadDelMedico</span>);
+
+<span class="cm">-- 5.7 Pacientes sin enfermedad en diagnóstico</span>
+<span class="kw">CREATE OR REPLACE VIEW</span> <span class="fn">v_PacientesSinEnfermedad</span> <span class="kw">AS</span>
+<span class="kw">SELECT DISTINCT</span> p.<span class="col">nombresP</span>, p.<span class="col">paternoP</span>, p.<span class="col">maternoP</span>
+<span class="kw">FROM</span>   <span class="tbl">tPaciente</span> p
+<span class="kw">JOIN</span>   <span class="tbl">tDiagnostico</span> d <span class="kw">ON</span> p.codP = d.codP
+<span class="kw">WHERE</span>  d.codD <span class="kw">NOT IN</span> (<span class="kw">SELECT</span> codD <span class="kw">FROM</span> <span class="tbl">tEnfermedadEnElDiagnostico</span>);</div>
+  </div>
+
+  <!-- TIPOS DE VISTAS -->
+  <div class="section-title reveal">
+    <span class="num">06</span>
+    <h2>Tipos de consultas sobre Vistas</h2>
+    <div class="line"></div>
+  </div>
+
+  <div class="grid-3 reveal">
+    <div class="card c1">
+      <span class="card-icon">📋</span>
+      <h3>Consulta simple</h3>
+      <p>SELECT * FROM v_vista — accede como tabla normal, devuelve todos los registros de la consulta almacenada.</p>
+    </div>
+    <div class="card c2">
+      <span class="card-icon">📊</span>
+      <h3>Agregación</h3>
+      <p>COUNT(), SUM(), AVG() con GROUP BY sobre la vista. Ideal para reportes estadísticos sin reescribir JOINs.</p>
+    </div>
+    <div class="card c3">
+      <span class="card-icon">🔍</span>
+      <h3>Filtros con HAVING</h3>
+      <p>Filtra grupos después del GROUP BY. Útil para "médicos con 2+ especialidades" o umbrales de conteo.</p>
+    </div>
+    <div class="card c4">
+      <span class="card-icon">🚫</span>
+      <h3>NOT IN / NOT EXISTS</h3>
+      <p>Detecta registros sin relación: enfermedades no diagnosticadas, especialidades sin médico asignado.</p>
+    </div>
+    <div class="card c5">
+      <span class="card-icon">🔗</span>
+      <h3>Vista sobre vista</h3>
+      <p>Una consulta puede usar otra vista como fuente. Ej: filtrar v_MedicosEspecialidades con HAVING.</p>
+    </div>
+    <div class="card c6">
+      <span class="card-icon">🔄</span>
+      <h3>DISTINCT</h3>
+      <p>Elimina duplicados en vistas con múltiples JOINs. Esencial cuando un paciente tiene varios diagnósticos.</p>
+    </div>
+  </div>
+
+  <!-- CONCLUSIÓN -->
+  <div class="conclusion reveal">
+    <h2>Conclusión</h2>
+    <p>La implementación de vistas en el sistema clínico permite transformar una estructura de datos compleja y fragmentada en información simplificada, segura y accesible. Las vistas facilitan la generación de reportes estratégicos — como especialidades desatendidas o el conteo de enfermedades por paciente — sin necesidad de reescribir consultas extensas ni comprometer la integridad de las tablas originales.</p>
+    <div style="margin-top:24px">
+      <span class="pill a1" style="margin:4px">Simplicidad</span>
+      <span class="pill a2" style="margin:4px">Seguridad</span>
+      <span class="pill a3" style="margin:4px">Reutilización</span>
+      <span class="pill a4" style="margin:4px">Mantenimiento</span>
+      <span class="pill a5" style="margin:4px">Rendimiento</span>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <p>UNIVERSIDAD ANDINA DEL CUSCO · Facultad de Ingeniería y Arquitectura</p>
+    <p style="margin-top:6px">Docente: Hugo Espetia Huamanga · Alumno: Triveños Llaccta Richard · 2026</p>
+    <p style="margin-top:6px; color:#334155">github.com/64bitsok/taller-2.3</p>
+  </div>
+
+</div>
+
+<script>
+  // Intersection Observer para animaciones de entrada
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08 });
+
+  reveals.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
